@@ -18,11 +18,11 @@
 
 void handle_command(char *command, int main_child_pid) {
     uint32_t signal = -1;
-    if (sscanf(str, "signal %u\n", &signal) == 1) {
+    if (sscanf(command, "signal %u\n", &signal) == 1) {
 	if (main_child_pid != -1) {
 	    try_(kill(main_child_pid, signal));
 	}
-    } else if (sscanf(str, "signal_all %u\n", &signal) == 1) {
+    } else if (sscanf(command, "signal_all %u\n", &signal) == 1) {
 	signal_all_children(signal);
     }
 }
@@ -33,7 +33,7 @@ void read_controlfd(int controlfd, int main_child_pid) {
     while ((size = try_(read(controlfd, &buf, sizeof(buf)-1))) > 0) {
 	buf[size] = '\0';
 	/* BUG we assume we get full lines, one line at a time */
-	handle_control_message(main_child_pid, buf);
+	handle_command(buf, main_child_pid);
 	memset(buf, 0, sizeof(buf));
     }
 }
